@@ -83,6 +83,29 @@ for ccpa in ccp_alpha:
     acc_ccp.append(dtree.score(x_test, y_test))
 
 
+#Plot the accuracy vs ccp_alpha
+sns.set_style("whitegrid")
+plt.plot(ccp_alpha, acc_ccp)
+plt.xlabel("ccp_alpha")
+plt.ylabel("Accuracy")
+plt.show()
+
+# Find the largest accuracy and the ccp value this occurs
+max_acc = max(acc_ccp)
+ccp_max = ccp_alpha[acc_ccp.index(max_acc)]
+
+# Find the depth that gave the maximum accuracy
+max_depth = acc_depth.index(max(acc_depth)) + 1
+
+# Fit a decision tree model with the values for max_depth and ccp_alpha found above
+dtree.set_params(max_depth=max_depth, ccp_alpha=ccp_max)
+dtree.fit(x_train, y_train)
+
+# Plot the final decision tree with larger font size
+plt.figure(figsize=(15,10))  # Increase the size of the figure
+tree.plot_tree(dtree, fontsize=10)  # Increase the font size
+plt.show()
+
 new_flag_attributes = {
     'red': [1],  # Red is present
     'green': [0],  # Green is not present
@@ -91,9 +114,9 @@ new_flag_attributes = {
     'white': [1],  # White is present
     'black': [0],  # Black is not present
     'orange': [0],  # Orange is not present
-    'mainhue': ['blue'],  # Main color can be considered blue
+    'mainhue': ['red'],  # Main color can be considered blue
     'bars': [0],  # No bars
-    'stripes': [5],  # 13 stripes
+    'stripes': [3],  # 13 stripes
     'circles': [0],  # No circles
     'crosses': [0],  # No crosses
     'saltires': [0],  # No saltires
