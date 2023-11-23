@@ -25,13 +25,13 @@ europe_oceania = df[df['landmass'].isin([3, 6])]
 # print(europe_oceania.groupby('landmass')[var].mean())
 
 #Create labels for only Europe and Oceania
-labels = europe_oceania['landmass']
+labels = df['landmass']
 
 #Print the variable types for the predictors
 print(df[var].dtypes)
 
 #Create dummy variables for categorical predictors
-data = pd.get_dummies(europe_oceania[var])
+data = pd.get_dummies(df[var])
 
 #Split data into a train and test set
 x_train, x_test, y_train, y_test = train_test_split(data, labels, test_size = 0.3, random_state = 1)
@@ -60,7 +60,41 @@ max_acc = max(acc_depth)
 #Refit decision tree model with the highest accuracy and plot the decision tree
 dtree.set_params(max_depth = acc_depth.index(max_acc)+1)
 dtree.fit(x_train, y_train)
-tree.plot_tree(dtree)
+plt.figure(figsize=(15,10))  # Increase the size of the figure
+tree.plot_tree(dtree, fontsize=10)  # Increase the font size
 plt.show()
 
+#Create a new list for the accuracy values of a pruned decision tree.  Loop through
+#the values of ccp and append the scores to the list
+ccp = dtree.cost_complexity_pruning_path(x_train, y_train)
+ccp_alpha = ccp['ccp_alphas']
+acc_ccp = []
+for ccpa in ccp_alpha:
+    dtree.set_params(ccp_alpha = ccpa)
+    dtree.fit(x_train, y_train)
+    acc_ccp.append(dtree.score(x_test, y_test))
+
+
+#Plot the accuracy vs ccp_alpha
+sns.set_style("whitegrid")
+plt.plot(ccp_alpha, acc_ccp)
+plt.xlabel("ccp_alpha")
+plt.ylabel("Accuracy")
+plt.show()
+
+# Find the largest accuracy and the ccp value this occurs
+max_acc = max(acc_ccp)
+ccp_max = ccp_alpha[acc_ccp.index(max_acc)]
+
+# Find the depth that gave the maximum accuracy
+max_depth = acc_depth.index(max(acc_depth)) + 1
+
+# Fit a decision tree model with the values for max_depth and ccp_alpha found above
+dtree.set_params(max_depth=max_depth, ccp_alpha=ccp_max)
+dtree.fit(x_train, y_train)
+
+# Plot the final decision tree with larger font size
+plt.figure(figsize=(15,10))  # Increase the size of the figure
+tree.plot_tree(dtree, fontsize=10)  # Increase the font size
+plt.show()
 
